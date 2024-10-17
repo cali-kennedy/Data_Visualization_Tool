@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -9,5 +10,15 @@ public class Data_Visualization_Tool {
         for (DataModel journalEntry : journalData) {
             System.out.println(journalEntry); // This calls the toString() method of DataModel
         }
+
+        JFrame frame = new JFrame("Data Visualization Tool");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        // Create and add the TablePanel
+        TablePanel tablePanel = new TablePanel(journalData);
+        frame.add(tablePanel);
+        frame.setVisible(true);
+
     }
 }

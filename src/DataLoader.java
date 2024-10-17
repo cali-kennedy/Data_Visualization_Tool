@@ -1,27 +1,28 @@
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.nio.file.*;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class DataLoader {
 
     public ArrayList<DataModel> loadCSVData(String fileName) throws IOException {
 
-        String contents = Files.readString(Path.of(fileName), StandardCharsets.UTF_8);
-        Scanner scanner = new Scanner(contents);
+        // Use InputStream to open a file and BufferedReader to read characters
+        Path path = Paths.get(fileName);
+        InputStream inputStream = Files.newInputStream(path);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+        String currentLine;
         ArrayList<DataModel> journalData = new ArrayList<>();
 
-        scanner.nextLine();
-        scanner.useDelimiter(",");
+        // Skip the header
+        reader.readLine();
 
-
-        while (scanner.hasNextLine()) {
-            String current_line = scanner.nextLine();
-            String[] fields = parseCSVLine(current_line);  // Using the parseCSVLine method for safe parsing
+        // Read the file line by line
+        while ((currentLine = reader.readLine()) != null) {
+            String[] fields = parseCSVLine(currentLine);  // Using the parseCSVLine method for safe parsing
 
             // Ensure there are at least the required fields
             if (fields.length >= 8) {

@@ -35,7 +35,7 @@ public class DataModel {
         this.artist_and_title = artist_and_title;
     }
 
-    public String getArtist(String artist){
+    public String getArtist(){
         return artist;
     }
 
