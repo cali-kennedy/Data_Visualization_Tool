@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Data_Visualization_Tool {
+public class Data_Visualization_Tool extends JFrame{
     public static void main(String[] args) throws IOException {
         DataLoader data_loader = new DataLoader();
         ArrayList<DataModel> journalData;

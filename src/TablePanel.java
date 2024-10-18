@@ -23,11 +23,13 @@ public class TablePanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private TableRowSorter<DefaultTableModel> sorter;
-
     // Toggle buttons for filtering
     private JToggleButton lowTotalStreamsToggle, mediumTotalStreamsToggle, highTotalStreamsToggle;
     private JToggleButton lowDailyStreamsToggle, highDailyStreamsToggle;
 
+
+    // UI Components
+    private DetailsPanel detailsPanel;  // Adding the DetailsPanel
     private JLabel rowCountLabel;
     private ArrayList<DataModel> originalData;
 
@@ -37,6 +39,7 @@ public class TablePanel extends JPanel {
 
         initializeTable();
         initializeFilterPanel();
+        initializeDetailsPanel();  // Initialize the DetailsPanel
         initializeFooterPanel();
         populateTable(originalData);
     }
@@ -53,6 +56,24 @@ public class TablePanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
+
+        // Add a listener to update the DetailsPanel when a row is selected
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0) {
+                    int modelIndex = table.convertRowIndexToModel(selectedRow);
+                    DataModel selectedItem = originalData.get(modelIndex);
+                    detailsPanel.updateDetails(selectedItem);  // Update details panel with selected item
+                }
+            }
+        });
+    }
+
+    // Initializes the DetailsPanel and adds it to the right side of the table
+    private void initializeDetailsPanel() {
+        detailsPanel = new DetailsPanel();  // Create the DetailsPanel
+        add(detailsPanel, BorderLayout.EAST);  // Add the details panel to the right side
     }
 
     // Initializes the filter panel with toggle buttons
@@ -60,13 +81,13 @@ public class TablePanel extends JPanel {
         JPanel filterPanel = new JPanel(new GridLayout(2, 3, 10, 10));
 
         // Total Streams toggle buttons
-        lowTotalStreamsToggle = createToggleButton("Total Streams <= 150,000,000", filterPanel, true);
-        mediumTotalStreamsToggle = createToggleButton("Total Streams >= 1,000,000,000", filterPanel, true);
-        highTotalStreamsToggle = createToggleButton("Total Streams >= 2,000,000,000", filterPanel, true);
+        JToggleButton lowTotalStreamsToggle = createToggleButton("Total Streams <= 150,000,000", filterPanel, true);
+        JToggleButton mediumTotalStreamsToggle = createToggleButton("Total Streams >= 1,000,000,000", filterPanel, true);
+        JToggleButton highTotalStreamsToggle = createToggleButton("Total Streams >= 2,000,000,000", filterPanel, true);
 
         // Daily Streams toggle buttons
-        lowDailyStreamsToggle = createToggleButton("Daily Streams <= 50,000", filterPanel, false);
-        highDailyStreamsToggle = createToggleButton("Daily Streams >= 50,000", filterPanel, false);
+        JToggleButton lowDailyStreamsToggle = createToggleButton("Daily Streams <= 50,000", filterPanel, false);
+        JToggleButton highDailyStreamsToggle = createToggleButton("Daily Streams >= 50,000", filterPanel, false);
 
         add(filterPanel, BorderLayout.NORTH);
     }
@@ -117,7 +138,6 @@ public class TablePanel extends JPanel {
         // Add the footer panel to the bottom of the main panel
         add(footerPanel, BorderLayout.SOUTH);
     }
-
 
     // Populates the table with data
     private void populateTable(ArrayList<DataModel> data) {

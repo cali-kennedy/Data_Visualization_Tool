@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class StatsPanel extends JPanel {
 
@@ -10,6 +13,7 @@ public class StatsPanel extends JPanel {
     private JTextArea topArtistsTextArea;
     private JTextArea yearlyGrowthTextArea;
     private JTextArea totalStreamsByYearTextArea;
+    private JButton viewChartButton;  // Button to view the chart
 
     // Constructor to initialize the panel with data and display the statistics
     public StatsPanel(ArrayList<DataModel> data) {
@@ -24,9 +28,12 @@ public class StatsPanel extends JPanel {
 
         // Update and display the statistics using the provided data
         updateStatistics(data);
+
+        // Add action to the view chart button
+        addViewChartButtonAction(data);
     }
 
-    // Initializes all UI components (labels and text areas)
+    // Initializes all UI components (labels, text areas, and the view chart button)
     private void initializeComponents() {
         averageDailyStreamsLabel = createStyledLabel("Average Daily Streams", 18, Font.BOLD, Color.DARK_GRAY);
 
@@ -38,6 +45,12 @@ public class StatsPanel extends JPanel {
 
         totalStreamsByYearTextArea = createStyledTextArea();
         totalStreamsByYearTextArea.setBorder(BorderFactory.createTitledBorder("Total Streams by Year"));
+
+        // Initialize the button to view the chart
+        viewChartButton = new JButton("View Chart");
+        viewChartButton.setFont(new Font("Arial", Font.BOLD, 16));
+        viewChartButton.setBackground(new Color(70, 130, 180));  // Steel blue color for the button
+        viewChartButton.setForeground(Color.WHITE);
     }
 
     // Adds the components to the panel with consistent padding
@@ -46,6 +59,7 @@ public class StatsPanel extends JPanel {
         add(createSectionPanel(new JScrollPane(topArtistsTextArea)));
         add(createSectionPanel(new JScrollPane(yearlyGrowthTextArea)));
         add(createSectionPanel(new JScrollPane(totalStreamsByYearTextArea)));
+        add(createSectionPanel(viewChartButton)); // Add the view chart button at the bottom
     }
 
     // Updates the panel with the calculated statistics
@@ -74,6 +88,20 @@ public class StatsPanel extends JPanel {
         }
 
         topArtistsTextArea.setText(topArtistsText.toString());
+    }
+
+    // Adds the action listener to the view chart button to show the chart in a new window
+    private void addViewChartButtonAction(ArrayList<DataModel> data) {
+        viewChartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Calculate total streams by year
+                TreeMap<Integer, Double> totalStreamsByYear = StatsCalculator.getTotalStreamsByYear(data);
+
+                // Open the chart in a new JFrame
+                ChartPanel.visualizeTotalStreamsByYear(totalStreamsByYear);
+            }
+        });
     }
 
     // Helper method to create a styled label with custom font, size, and color
