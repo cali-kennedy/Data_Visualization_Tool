@@ -6,21 +6,29 @@ import java.util.ArrayList;
 import java.text.NumberFormat;
 
 public class TablePanel extends JPanel {
+    // Constants for Stream Ranges
+    private static final double MIN_STREAMS_DEFAULT = 0;
+    private static final double MAX_STREAMS_DEFAULT = Double.MAX_VALUE;
+    private static final double MAX_TOTAL_STREAMS_LOW = 150_000_000;
+    private static final double MIN_TOTAL_STREAMS_MEDIUM = 1_000_000_000;
+    private static final double MIN_TOTAL_STREAMS_HIGH = 2_000_000_000;
+    private static final double MAX_DAILY_STREAMS_LOW = 50_000;
+    private static final double MIN_DAILY_STREAMS_HIGH = 50_000;
+
+    private double minTotalStreams = MIN_STREAMS_DEFAULT;
+    private double maxTotalStreams = MAX_STREAMS_DEFAULT;
+    private double minDailyStreams = MIN_STREAMS_DEFAULT;
+    private double maxDailyStreams = MAX_STREAMS_DEFAULT;
 
     private JTable table;
     private DefaultTableModel tableModel;
     private TableRowSorter<DefaultTableModel> sorter;
 
     // Toggle buttons for filtering
-    private JToggleButton totalToggle1, totalToggle2, totalToggle3;
-    private JToggleButton dailyToggle1, dailyToggle2;
+    private JToggleButton lowTotalStreamsToggle, mediumTotalStreamsToggle, highTotalStreamsToggle;
+    private JToggleButton lowDailyStreamsToggle, highDailyStreamsToggle;
 
     private JLabel rowCountLabel;
-    private double minTotalStreams = 0;
-    private double maxTotalStreams = Double.MAX_VALUE;
-    private double minDailyStreams = 0;
-    private double maxDailyStreams = Double.MAX_VALUE;
-
     private ArrayList<DataModel> originalData;
 
     public TablePanel(ArrayList<DataModel> data) {
@@ -29,8 +37,7 @@ public class TablePanel extends JPanel {
 
         initializeTable();
         initializeFilterPanel();
-        initializeRowCountLabel();
-
+        initializeFooterPanel();
         populateTable(originalData);
     }
 
@@ -53,15 +60,33 @@ public class TablePanel extends JPanel {
         JPanel filterPanel = new JPanel(new GridLayout(2, 3, 10, 10));
 
         // Total Streams toggle buttons
-        totalToggle1 = createToggleButton("Total Streams <= 150,000,000", filterPanel, true);
-        totalToggle2 = createToggleButton("Total Streams >= 1,000,000,000", filterPanel, true);
-        totalToggle3 = createToggleButton("Total Streams >= 2,000,000,000", filterPanel, true);
+        lowTotalStreamsToggle = createToggleButton("Total Streams <= 150,000,000", filterPanel, true);
+        mediumTotalStreamsToggle = createToggleButton("Total Streams >= 1,000,000,000", filterPanel, true);
+        highTotalStreamsToggle = createToggleButton("Total Streams >= 2,000,000,000", filterPanel, true);
 
         // Daily Streams toggle buttons
-        dailyToggle1 = createToggleButton("Daily Streams <= 50,000", filterPanel, false);
-        dailyToggle2 = createToggleButton("Daily Streams >= 50,000", filterPanel, false);
+        lowDailyStreamsToggle = createToggleButton("Daily Streams <= 50,000", filterPanel, false);
+        highDailyStreamsToggle = createToggleButton("Daily Streams >= 50,000", filterPanel, false);
 
         add(filterPanel, BorderLayout.NORTH);
+    }
+
+    // Method to show the aggregate statistics panel
+    private void showStatisticsPanel() {
+        // Create a new frame to display the statistics
+        JFrame statisticsFrame = new JFrame("Aggregate Statistics");
+        statisticsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        statisticsFrame.setSize(400, 200);
+
+        // Get the filtered data from the table
+        ArrayList<DataModel> filteredData = getFilteredData();
+
+        // Create a new StatsPanel and pass the filtered data
+        StatsPanel statisticsPanel = new StatsPanel(filteredData);
+        statisticsFrame.add(statisticsPanel);
+
+        // Make the frame visible
+        statisticsFrame.setVisible(true);
     }
 
     // Helper method to create a toggle button
@@ -73,12 +98,26 @@ public class TablePanel extends JPanel {
         return toggleButton;
     }
 
-    // Initializes the row count label
-    private void initializeRowCountLabel() {
+    // Create a new panel to hold both the row count label and the show statistics button
+    private void initializeFooterPanel() {
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Create a panel to hold the label and button
         rowCountLabel = new JLabel("Rows: " + tableModel.getRowCount());
         rowCountLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        add(rowCountLabel, BorderLayout.SOUTH);
+
+        // Add row count label to the footer panel
+        footerPanel.add(rowCountLabel);
+
+        // Add a button to show aggregate statistics
+        JButton showStatisticsButton = new JButton("Show Aggregate Statistics");
+        showStatisticsButton.addActionListener(e -> showStatisticsPanel());
+
+        // Add the show statistics button to the footer panel
+        footerPanel.add(showStatisticsButton);
+
+        // Add the footer panel to the bottom of the main panel
+        add(footerPanel, BorderLayout.SOUTH);
     }
+
 
     // Populates the table with data
     private void populateTable(ArrayList<DataModel> data) {
@@ -108,7 +147,6 @@ public class TablePanel extends JPanel {
         } else {
             resetFilterRange(isTotal);
         }
-
         applyRowFilter();
         updateRowCountLabel();
     }
@@ -116,45 +154,44 @@ public class TablePanel extends JPanel {
     // Sets the filter range based on the selected toggle button
     private void setFilterRange(boolean isTotal, JToggleButton selectedToggle) {
         if (isTotal) {
-            if (selectedToggle == totalToggle1) {
-                minTotalStreams = 0;
-                maxTotalStreams = 150_000_000;
-            } else if (selectedToggle == totalToggle2) {
-                minTotalStreams = 1_000_000_000;
-                maxTotalStreams = Double.MAX_VALUE;
-            } else if (selectedToggle == totalToggle3) {
-                minTotalStreams = 2_000_000_000;
-                maxTotalStreams = Double.MAX_VALUE;
+            if (selectedToggle == lowTotalStreamsToggle) {
+                minTotalStreams = MIN_STREAMS_DEFAULT;
+                maxTotalStreams = MAX_TOTAL_STREAMS_LOW;
+            } else if (selectedToggle == mediumTotalStreamsToggle) {
+                minTotalStreams = MIN_TOTAL_STREAMS_MEDIUM;
+                maxTotalStreams = MAX_STREAMS_DEFAULT;
+            } else if (selectedToggle == highTotalStreamsToggle) {
+                minTotalStreams = MIN_TOTAL_STREAMS_HIGH;
+                maxTotalStreams = MAX_STREAMS_DEFAULT;
             }
         } else {
-            if (selectedToggle == dailyToggle1) {
-                minDailyStreams = 0;
-                maxDailyStreams = 50_000;
-            } else if (selectedToggle == dailyToggle2) {
-                minDailyStreams = 50_000;
-                maxDailyStreams = Double.MAX_VALUE;
+            if (selectedToggle == lowDailyStreamsToggle) {
+                minDailyStreams = MIN_STREAMS_DEFAULT;
+                maxDailyStreams = MAX_DAILY_STREAMS_LOW;
+            } else if (selectedToggle == highDailyStreamsToggle) {
+                minDailyStreams = MIN_DAILY_STREAMS_HIGH;
+                maxDailyStreams = MAX_STREAMS_DEFAULT;
             }
         }
     }
 
     // Deselects conflicting toggle buttons
     private void deselectConflictingToggles(boolean isTotal, JToggleButton selectedToggle) {
+        JToggleButton[] totalToggles = {lowTotalStreamsToggle, mediumTotalStreamsToggle, highTotalStreamsToggle};
+        JToggleButton[] dailyToggles = {lowDailyStreamsToggle, highDailyStreamsToggle};
+
         if (isTotal) {
-            if (selectedToggle == totalToggle1) {
-                totalToggle2.setSelected(false);
-                totalToggle3.setSelected(false);
-            } else if (selectedToggle == totalToggle2) {
-                totalToggle1.setSelected(false);
-                totalToggle3.setSelected(false);
-            } else if (selectedToggle == totalToggle3) {
-                totalToggle1.setSelected(false);
-                totalToggle2.setSelected(false);
-            }
+            deselectOthers(selectedToggle, totalToggles);
         } else {
-            if (selectedToggle == dailyToggle1) {
-                dailyToggle2.setSelected(false);
-            } else if (selectedToggle == dailyToggle2) {
-                dailyToggle1.setSelected(false);
+            deselectOthers(selectedToggle, dailyToggles);
+        }
+    }
+
+    // Helper method to deselect all toggles except the selected one
+    private void deselectOthers(JToggleButton selectedToggle, JToggleButton[] toggleButtons) {
+        for (JToggleButton toggle : toggleButtons) {
+            if (toggle != selectedToggle) {
+                toggle.setSelected(false);
             }
         }
     }
@@ -162,27 +199,68 @@ public class TablePanel extends JPanel {
     // Resets the filter range to default values
     private void resetFilterRange(boolean isTotal) {
         if (isTotal) {
-            minTotalStreams = 0;
-            maxTotalStreams = Double.MAX_VALUE;
+            minTotalStreams = MIN_STREAMS_DEFAULT;
+            maxTotalStreams = MAX_STREAMS_DEFAULT;
         } else {
-            minDailyStreams = 0;
-            maxDailyStreams = Double.MAX_VALUE;
+            minDailyStreams = MIN_STREAMS_DEFAULT;
+            maxDailyStreams = MAX_STREAMS_DEFAULT;
         }
     }
 
-    // Applies the custom row filter to the table
+
+     //Applies a row filter to the table based on the selected total streams and daily streams filter ranges.
     private void applyRowFilter() {
+        // Set a custom row filter for the table sorter.
         sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+
+            /**
+             * Determines whether a table row should be included based on the filter criteria.
+             * @param entry - The table row entry being evaluated.
+             * @return boolean - Returns true if the row meets the filter criteria; otherwise, false.
+             */
             @Override
             public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                // Parse the total streams value from the 3rd column (index 2), removing commas for proper parsing.
                 double totalStreams = Double.parseDouble(entry.getStringValue(2).replace(",", ""));
+
+                // Parse the daily streams value from the 4th column (index 3).
                 double dailyStreams = Double.parseDouble(entry.getStringValue(3));
 
+                // Check if the row's total streams and daily streams values fall within the filter's range.
                 return totalStreams >= minTotalStreams && totalStreams <= maxTotalStreams &&
                         dailyStreams >= minDailyStreams && dailyStreams <= maxDailyStreams;
             }
         });
     }
+    // Method to get the currently filtered data from the table
+    private ArrayList<DataModel> getFilteredData() {
+        ArrayList<DataModel> filteredData = new ArrayList<>();
+
+        // Loop through the visible rows after filtering
+        for (int i = 0; i < table.getRowCount(); i++) {
+            int modelIndex = table.convertRowIndexToModel(i); // Get the model index from the view index
+
+            String artistAndTitle = (String) tableModel.getValueAt(modelIndex, 0);
+            String artist = (String) tableModel.getValueAt(modelIndex, 1);
+            double totalStreams = Double.parseDouble(tableModel.getValueAt(modelIndex, 2).toString().replace(",", ""));
+            double dailyStreams = Double.parseDouble(tableModel.getValueAt(modelIndex, 3).toString());
+            double year = Double.parseDouble(tableModel.getValueAt(modelIndex, 4).toString());
+            String mainGenre = (String) tableModel.getValueAt(modelIndex, 5);
+
+            // Create a new DataModel for the current row
+            DataModel model = new DataModel();
+            model.setArtist_and_title(artistAndTitle);
+            model.setArtist(artist);
+            model.setTotal_streams(totalStreams);
+            model.setDaily_streams(dailyStreams);
+            model.setYear(year);
+            model.setMain_genre(mainGenre);
+
+            filteredData.add(model);  // Add the model to the filtered data list
+        }
+        return filteredData;
+    }
+
 
     // Updates the row count label after applying or removing filters
     private void updateRowCountLabel() {

@@ -13,7 +13,7 @@ public class Data_Visualization_Tool {
 
         JFrame frame = new JFrame("Data Visualization Tool");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(1000, 600);
 
         // Create and add the TablePanel
         TablePanel tablePanel = new TablePanel(journalData);
