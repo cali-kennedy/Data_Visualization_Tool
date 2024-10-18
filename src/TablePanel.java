@@ -76,7 +76,7 @@ public class TablePanel extends JPanel {
         // Create a new frame to display the statistics
         JFrame statisticsFrame = new JFrame("Aggregate Statistics");
         statisticsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        statisticsFrame.setSize(400, 200);
+        statisticsFrame.setSize(550, 400);
 
         // Get the filtered data from the table
         ArrayList<DataModel> filteredData = getFilteredData();
