@@ -20,5 +20,6 @@ public class Data_Visualization_Tool extends JFrame{
         frame.add(tablePanel);
         frame.setVisible(true);
 
+
     }
 }

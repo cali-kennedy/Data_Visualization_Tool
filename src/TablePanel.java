@@ -4,6 +4,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
 import java.text.NumberFormat;
+import java.util.List;
 
 public class TablePanel extends JPanel {
     // Constants for Stream Ranges
@@ -20,44 +21,48 @@ public class TablePanel extends JPanel {
     private double minDailyStreams = MIN_STREAMS_DEFAULT;
     private double maxDailyStreams = MAX_STREAMS_DEFAULT;
 
+    // UI Components
     private JTable table;
     private DefaultTableModel tableModel;
     private TableRowSorter<DefaultTableModel> sorter;
+
     // Toggle buttons for filtering
     private JToggleButton lowTotalStreamsToggle, mediumTotalStreamsToggle, highTotalStreamsToggle;
     private JToggleButton lowDailyStreamsToggle, highDailyStreamsToggle;
+    private JToggleButton showPieChartToggle;
 
+    private DetailsPanel detailsPanel;  // Panel for showing details when a row is selected
+    private JLabel rowCountLabel;  // Displays the number of rows currently shown
+    private ArrayList<DataModel> originalData;  // Original list of data for the table
 
-    // UI Components
-    private DetailsPanel detailsPanel;  // Adding the DetailsPanel
-    private JLabel rowCountLabel;
-    private ArrayList<DataModel> originalData;
-
+    // TablePanel Constructor
     public TablePanel(ArrayList<DataModel> data) {
         this.originalData = data;
         setLayout(new BorderLayout());
 
-        initializeTable();
-        initializeFilterPanel();
-        initializeDetailsPanel();  // Initialize the DetailsPanel
-        initializeFooterPanel();
-        populateTable(originalData);
+        initializeTable();  // Sets up the JTable and its data model
+        initializeFilterPanel();  // Adds filter toggle buttons to filter data
+        initializeDetailsPanel();  // Adds a panel to show details of the selected row
+        initializeFooterPanel();  // Footer panel with row count and statistics buttons
+        populateTable(originalData);  // Populates the table with the data
     }
 
     // Initializes the JTable and sorter for the table
     private void initializeTable() {
         String[] columnNames = {"Artist and Title", "Artist", "Total Streams", "Daily Streams", "Year", "Main Genre"};
 
-        tableModel = new DefaultTableModel(columnNames, 0);
-        table = new JTable(tableModel);
+        tableModel = new DefaultTableModel(columnNames, 0);  // Create the table model with column names
+        table = new JTable(tableModel);  // Create the JTable
+        table.setRowHeight(20);  // Set row height
+        table.setAutoscrolls(true);
 
-        sorter = new TableRowSorter<>(tableModel);
+        sorter = new TableRowSorter<>(tableModel);  // Enable sorting for table columns
         table.setRowSorter(sorter);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);  // Add table to the center of the panel
 
-        // Add a listener to update the DetailsPanel when a row is selected
+        // Listener to update the DetailsPanel when a row is selected
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = table.getSelectedRow();
@@ -73,41 +78,41 @@ public class TablePanel extends JPanel {
     // Initializes the DetailsPanel and adds it to the right side of the table
     private void initializeDetailsPanel() {
         detailsPanel = new DetailsPanel();  // Create the DetailsPanel
+        detailsPanel.setPreferredSize(new Dimension(300, 300));  // Set the preferred size
         add(detailsPanel, BorderLayout.EAST);  // Add the details panel to the right side
     }
 
     // Initializes the filter panel with toggle buttons
     private void initializeFilterPanel() {
-        JPanel filterPanel = new JPanel(new GridLayout(2, 3, 10, 10));
+        JPanel filterPanel = new JPanel(new GridLayout(2, 3, 10, 10));  // Grid layout for toggle buttons
 
-        // Total Streams toggle buttons
-        JToggleButton lowTotalStreamsToggle = createToggleButton("Total Streams <= 150,000,000", filterPanel, true);
-        JToggleButton mediumTotalStreamsToggle = createToggleButton("Total Streams >= 1,000,000,000", filterPanel, true);
-        JToggleButton highTotalStreamsToggle = createToggleButton("Total Streams >= 2,000,000,000", filterPanel, true);
+        // Create toggle buttons for total streams filters
+        lowTotalStreamsToggle = createToggleButton("Total Streams <= 150,000,000", filterPanel, true);
+        mediumTotalStreamsToggle = createToggleButton("Total Streams >= 1,000,000,000", filterPanel, true);
+        highTotalStreamsToggle = createToggleButton("Total Streams >= 2,000,000,000", filterPanel, true);
 
-        // Daily Streams toggle buttons
-        JToggleButton lowDailyStreamsToggle = createToggleButton("Daily Streams <= 50,000", filterPanel, false);
-        JToggleButton highDailyStreamsToggle = createToggleButton("Daily Streams >= 50,000", filterPanel, false);
+        // Create toggle buttons for daily streams filters
+        lowDailyStreamsToggle = createToggleButton("Daily Streams <= 50,000", filterPanel, false);
+        highDailyStreamsToggle = createToggleButton("Daily Streams >= 50,000", filterPanel, false);
 
-        add(filterPanel, BorderLayout.NORTH);
+        // Toggle button for showing pie chart
+        showPieChartToggle = createToggleButton("Show Pie Chart", filterPanel, false);
+
+        add(filterPanel, BorderLayout.NORTH);  // Add filter panel to the top of the panel
     }
 
-    // Method to show the aggregate statistics panel
+    // Method to show the aggregate statistics panel in a new window
     private void showStatisticsPanel() {
-        // Create a new frame to display the statistics
         JFrame statisticsFrame = new JFrame("Aggregate Statistics");
         statisticsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         statisticsFrame.setSize(550, 400);
 
-        // Get the filtered data from the table
+        // Get the filtered data from the table and pass to StatsPanel
         ArrayList<DataModel> filteredData = getFilteredData();
-
-        // Create a new StatsPanel and pass the filtered data
         StatsPanel statisticsPanel = new StatsPanel(filteredData);
         statisticsFrame.add(statisticsPanel);
 
-        // Make the frame visible
-        statisticsFrame.setVisible(true);
+        statisticsFrame.setVisible(true);  // Show the statistics window
     }
 
     // Helper method to create a toggle button
@@ -127,7 +132,9 @@ public class TablePanel extends JPanel {
 
         // Add row count label to the footer panel
         footerPanel.add(rowCountLabel);
-
+        footerPanel.add(showPieChartToggle);
+        showPieChartToggle.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
+        showPieChartToggle.setPreferredSize(new Dimension(200,30));
         // Add a button to show aggregate statistics
         JButton showStatisticsButton = new JButton("Show Aggregate Statistics");
         showStatisticsButton.addActionListener(e -> showStatisticsPanel());
@@ -191,6 +198,9 @@ public class TablePanel extends JPanel {
             } else if (selectedToggle == highDailyStreamsToggle) {
                 minDailyStreams = MIN_DAILY_STREAMS_HIGH;
                 maxDailyStreams = MAX_STREAMS_DEFAULT;
+            } else if (selectedToggle == showPieChartToggle) {
+                // make a new method that will show pie chart panel should have it already in stats panel
+                showPieChart();
             }
         }
     }
@@ -281,6 +291,24 @@ public class TablePanel extends JPanel {
         return filteredData;
     }
 
+    private void showPieChart() {
+        JFrame pieChartFrame = new JFrame("Top 5 Artists by Total Streams");
+        PieChartPanel pieChartPanel = new PieChartPanel();
+        pieChartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // Get the top 5 artists from StatsCalculator
+        List<DataModel> topArtists = StatsCalculator.getTopArtists((getFilteredData()), 5).stream()
+                .map(entry -> getFilteredData().stream().filter(model -> model.getArtist().equals(entry.getKey())).findFirst().orElse(null))
+                .toList();
+
+        // Update the pie chart with the top 5 artists
+        pieChartPanel.updatePieChart(topArtists);
+
+        pieChartFrame.add(pieChartPanel);
+        pieChartFrame.pack();
+        pieChartFrame.setLocationRelativeTo(null);
+        pieChartFrame.setVisible(true);
+    }
 
     // Updates the row count label after applying or removing filters
     private void updateRowCountLabel() {

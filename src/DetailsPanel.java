@@ -41,7 +41,7 @@ public class DetailsPanel extends JPanel {
         thirdGenreLabel = createStyledLabel("", regularFont);
 
         // Add labels to panel (BoxLayout ensures vertical stacking)
-        add(createGroupPanel("Artist and Title:", artistAndTitleLabel, boldFont));
+        add(createGroupPanel("Selected Artist and Title:", artistAndTitleLabel, boldFont));
         add(createGroupPanel("Artist:", artistLabel, boldFont));
         add(createGroupPanel("Total Streams:", totalStreamsLabel, boldFont));
         add(createGroupPanel("Daily Streams:", dailyStreamsLabel, boldFont));
