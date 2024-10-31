@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Data_Visualization_Tool extends JFrame{
+public class Spotify_Data_Visualization_Tool extends JFrame{
     public static void main(String[] args) throws IOException {
         DataLoader data_loader = new DataLoader();
         ArrayList<DataModel> journalData;
@@ -11,7 +11,7 @@ public class Data_Visualization_Tool extends JFrame{
             System.out.println(journalEntry); // This calls the toString() method of DataModel
         }
 
-        JFrame frame = new JFrame("Data Visualization Tool");
+        JFrame frame = new JFrame("Spotify Streaming Analytics Dashboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 600);
 
