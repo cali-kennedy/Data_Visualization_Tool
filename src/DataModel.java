@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class DataModel {
     private String artist_and_title;
@@ -13,6 +14,7 @@ public class DataModel {
     private String first_genre;
     private String second_genre;
     private String third_genre;
+    private List<DataObserver> observers = new ArrayList<>();
 
     public DataModel() {
         artist_and_title = "x";
@@ -89,6 +91,8 @@ public class DataModel {
         // Store a clean string for the genreList
         this.genreList = String.join(", ", genres);
     }
+
+
 
     public String getFirst_genre() {
         return first_genre;

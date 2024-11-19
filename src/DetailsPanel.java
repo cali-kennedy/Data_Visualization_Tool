@@ -1,7 +1,8 @@
+
 import javax.swing.*;
 import java.awt.*;
 
-public class DetailsPanel extends JPanel {
+public class DetailsPanel extends JPanel implements DataObserver {
 
     private JLabel artistAndTitleLabel;
     private JLabel artistLabel;
@@ -13,8 +14,12 @@ public class DetailsPanel extends JPanel {
     private JLabel firstGenreLabel;
     private JLabel secondGenreLabel;
     private JLabel thirdGenreLabel;
+    private final DataManager dataManager;
 
-    public DetailsPanel() {
+    public DetailsPanel(DataManager dataManager) {
+        this.dataManager = dataManager;
+        this.dataManager.attach(this); // Register as an observer
+
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS)); // Use BoxLayout for vertical stacking
 
         // Font settings for the labels
@@ -69,21 +74,24 @@ public class DetailsPanel extends JPanel {
         return panel;
     }
 
-    // Updates the details in the panel when a table row is selected
-    public void updateDetails(DataModel selectedItem) {
-        artistAndTitleLabel.setText(selectedItem.getArtist_and_title());
-        artistLabel.setText(selectedItem.getArtist());
-        totalStreamsLabel.setText(String.format("%,.0f", selectedItem.getTotal_streams()));
-        dailyStreamsLabel.setText(String.format("%.1f", selectedItem.getDaily_streams()));
-        yearLabel.setText(String.format("%,.0f", selectedItem.getYear()));
-        mainGenreLabel.setText(selectedItem.getMain_genre());
+    @Override
+    public void update() {
+        DataModel selectedItem = dataManager.getSelectedData();
+        if (selectedItem != null) {
+            artistAndTitleLabel.setText(selectedItem.getArtist_and_title());
+            artistLabel.setText(selectedItem.getArtist());
+            totalStreamsLabel.setText(String.format("%,.0f", selectedItem.getTotal_streams()));
+            dailyStreamsLabel.setText(String.format("%.1f", selectedItem.getDaily_streams()));
+            yearLabel.setText(String.format("%,.0f", selectedItem.getYear()));
+            mainGenreLabel.setText(selectedItem.getMain_genre());
 
-        // Update genres area with scroll support
-        genresTextArea.setText(String.join(", ", selectedItem.getGenres()));
+            // Update genres area with scroll support
+            genresTextArea.setText(String.join(", ", selectedItem.getGenres()));
 
-        firstGenreLabel.setText(selectedItem.getFirst_genre());
-        secondGenreLabel.setText(selectedItem.getSecond_genre());
-        thirdGenreLabel.setText(selectedItem.getThird_genre());
+            firstGenreLabel.setText(selectedItem.getFirst_genre());
+            secondGenreLabel.setText(selectedItem.getSecond_genre());
+            thirdGenreLabel.setText(selectedItem.getThird_genre());
+        }
     }
 
     // Helper method to create styled labels
